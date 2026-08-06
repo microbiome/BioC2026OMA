@@ -1,4 +1,4 @@
-Package: BioC2026-OMA
+Package: BioC2026OMA
 Title: Orchestrating Microbiome Analysis workshop
 Version: 2.0.2
 Authors@R: 
@@ -36,7 +36,7 @@ Remotes:
     github::microbiome/mia,
     github::microbiome/miaViz,
     github::microbiome/multiomics
-URL: https://microbiome.github.io/BioC2026-OMA/
-BugReports: https://github.com/mcirobiome/BioC2026-OMA/issues/new/choose
+URL: https://microbiome.github.io/BioC2026OMA/
+BugReports: https://github.com/mcirobiome/BioC2026OMA/issues/new/choose
 VignetteBuilder: knitr
-DockerImage: ghcr.io/mcirobiome/BioC2026-OMA:latest
+DockerImage: ghcr.io/mcirobiome/BioC2026OMA:latest

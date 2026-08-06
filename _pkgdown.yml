@@ -1,4 +1,4 @@
-url: https://microbiome.github.io/BioC2026-OMA
+url: https://microbiome.github.io/BioC2026OMA
 
 template:
   params:
@@ -6,13 +6,13 @@ template:
     #ganalytics: UA-99999999-9
 
 home:
-  title: "BioC2026-OMA"
+  title: "BioC2026OMA"
   type: inverse
 
 
 navbar:
   right:
    - icon: fa-github
-     href: https://github.com/microbiome/BioC2026-OMA
+     href: https://github.com/microbiome/BioC2026OMA
 
 
