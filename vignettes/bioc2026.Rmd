@@ -1,0 +1,578 @@
+---
+title: Bioconductor Conference 2026
+vignette: >
+    %\VignetteIndexEntry{BioC 2026}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    message: false
+    warning: false
+bibliography: ../inst/bibliography.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    warning = FALSE,
+    message = FALSE
+)
+```
+
+Authors:
+    Tuomas Borman^[University of Turku, tvborm@utu.fi]
+    <br/>
+Last modified: 06 August, 2026.
+
+<img src="figures/BioC2026.png" width="150"/> <img src="figures/mia_logo.png" width="130"/>
+
+## Overview
+
+### Description
+
+This training session introduces Bioconductor tools for microbiome data science
+through a practical case study. It focuses on a framework built around the
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` data container, designed for improved efficiency,
+scalability, and data integration. Participants will gain hands-on experience
+with common analysis and visualization methods using the mia package family,
+along with other interoperable tools from the Bioconductor ecosystem. After the
+session, participants can continue learning through the freely available
+[Orchestrating Microbiome Analysis (OMA) online book](https://bioconductor.org/books/release/OMA/).
+
+### Pre-requisites
+
+To get most of the training session, you should meet the following
+pre-requisites. 
+
+- You have a basic understanding of R. You have written simple R scripts or used Quarto/RMarkdown documents.
+- You are familiar with Bioconductor.
+- You have basic understanding on what the microbiome is.
+
+If your time allows, we recommend to spend some time to explore beforehand
+[Orchestrating Microbiome Analysis (OMA) online book](https://bioconductor.org/books/release/OMA/).
+
+### Participation
+
+Participants are encouraged to ask questions throughout the workshop. The
+session will follow
+[a tutorial](https://microbiome.github.io/OMATutorials/),
+with participants running the tutorial alongside the instructor.
+
+### _R_ / _Bioconductor_ packages used
+
+In this training session, we will cover a common methods and packages for
+microbiome data science in `r BiocStyle::Biocpkg("SummarizedExperiment")`
+ecosystem. We will have specific focus on `r BiocStyle::Biocpkg("mia")`,
+which provides essential methods for conducting microbiome analysis.
+
+### Time outline
+
+| Activity                           | Time |
+|------------------------------------|------|
+| Practicalities and background      | 15m  |
+| Trained-guided live coding         | 45m  |
+| Time to try things out on your own | 15m  |
+| Questions, discussion and recap    | 15m  |
+
+### Learning goals and objectives
+
+#### Questions
+
+- What is _mia_ and _OMA_?
+- How microbiome data science is conducted in `r BiocStyle::Biocpkg("SummarizedExperiment")` ecosystem?
+- What benefits this new ecosystem have compared to previous approaches?
+
+#### Objectives
+
+- **Analyze and apply methods**:  Apply the `r BiocStyle::Biocpkg("SummarizedExperiment")` ecosystem to process and analyze microbiome data.
+
+- **Create visualizations**: Generate and interpret visualizations.
+
+- **Explore documentation**: Use the [OMA](https://microbiome.github.io/OMA/docs/devel) to explore additional tools and methods.
+
+## Training session
+
+### Background
+
+#### Microbiome data science
+
+In microbiome research, researchers study interactions between microbes and their
+hosts, such as humans. Because of the intricate nature of these relationships,
+computational methods are essential.
+
+<figure>
+  <img src="figures/moreno-indias2021.png" width="500"/>
+  <figcaption><span>@MorenoIndias2021</span></figcaption>
+</figure>
+
+#### Microbiome-related data containers and ecosystems in Bioconductor
+
+Data containers provide a structured and standardized way to represent complex
+datasets. This is particularly important in biological research, where a single
+data table is often insufficient to capture the full richness of a dataset.
+
+Over the years, several approaches to data organization have been developed.
+One of the first widely adopted data containers in microbiome research was
+`r BiocStyle::Biocpkg("phyloseq")` [@McMurdie2013], designed for 16S amplicon
+sequencing data. However, it has limitations, particularly in linking multiple
+experiments and ensuring interoperability between tools in Bioconductor.
+
+`r BiocStyle::Biocpkg("SummarizedExperiment")` (SE) [@Huber2015], on the other
+hand, was introduced as a general-purpose container for biological data and has
+become the most widely used format within the Bioconductor ecosystem. It has
+since been extended to more specialized formats, including
+`r BiocStyle::Biocpkg("SingleCellExperiment")` [@Amezquita2020] for single-cell
+data and
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` (TreeSE) [@Huang2021], which
+is tailored for microbiome datasets.
+
+```{r, echo=FALSE, fig.cap="Timeline of microbiome-related data containter in Bioconductor"}
+#| label: microbiome_bioconductor
+#| fig-width: 15
+library(ggplot2)
+library(ggrepel)
+
+# Timeline data
+timeline_data <- data.frame(
+    year = c(2012, 2015, 2017, 2019),
+    event = c(
+        "phyloseq\nMcMurdie and Holmes, 2013",
+        "SummarizedExperiment\nHuber et al., 2015",
+        "SingleCellExperiment\nAmezquita et al., 2020", 
+        "TreeSummarizedExperiment\nHuang et al., 2021"
+    )
+)
+
+# Create a single polygon for the entire arrow (rectangle + arrowhead)
+arrow_data <- data.frame(
+    x = c(2021, 2024.5, 2024.5, 2025, 2024.5, 2024.5, 2021),
+    y = c(-0.14, -0.14, -0.16, -0.10, -0.04, -0.06, -0.06)
+)
+
+ggplot(timeline_data, aes(x = year, y = 0)) +
+    # Base timeline
+    annotate(
+        "segment", x = 2011, xend = 2025, y = 0, yend = 0,
+        arrow = arrow(length = unit(0.4, "cm"), type = "closed"),
+        linewidth = 1.5, color = "gray40"
+        ) +
+    
+    # Timeline points and segments
+    geom_point(size = 5, color = "#2C3E50") +
+    
+    # Repelled labels
+    geom_label_repel(
+        aes(
+          label = event),
+          direction = "y",
+          nudge_y = 0.02,
+          box.padding = 0.4,
+          point.padding = 0.5,
+          size = 5,
+          fontface = "bold",
+          color = "#34495E",
+          segment.color = "gray60"
+        ) +
+    
+    # mia: draw arrow-box from 2021 to 2025
+    geom_polygon(
+        data = arrow_data,
+        mapping = aes(x = x, y = y),
+        fill = "white", color = "black", linewidth = 0.8
+        ) +
+    annotate(
+        "text", x = 2022.75, y = -0.10,
+        label = "OMA\n(Borman et al., 2025)",
+        size = 5, fontface = "bold", color = "black", lineheight = 1.1
+        ) +
+    
+    # Final theming
+    scale_x_continuous(
+        breaks = c(timeline_data$year, 2021, 2025),
+        limits = c(2010, 2025)
+        ) +
+    scale_y_continuous(limits = c(-0.25, 0.3)) +
+    theme_minimal(base_size = 15) +
+    theme(
+        axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 12),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "none",
+        plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+    )
+```
+
+#### TreeSummarizedExperiment, TreeSE
+
+<figure>
+  <img src="figures/TreeSE.png" width="500"/>
+  <figcaption><span>@Huang2021</span></figcaption>
+</figure>
+
+#### Ochestrating Microbiome Analysis with Bioconductor (OMA)
+
+<div style="display: flex; gap: 2%; align-items: flex-start;">
+
+<div style="flex: 0 0 70%;">
+
+- [mia](https://bioconductor.org/packages/release/bioc/html/mia.html) (Data analysis)
+- [miaViz](https://bioconductor.org/packages/release/bioc/html/miaViz.html) (Visualization)
+- [miaSim](https://bioconductor.org/packages/release/bioc/html/miaSim.html) (Simulation)
+- [miaTime](https://github.com/microbiome/miaTime) (Time series analysis)
+- [miaDash](https://miadash-microbiome.2.rahtiapp.fi/) (Graphical user interface)
+- [iSEEtree](https://bioconductor.org/packages/release/bioc/html/iSEEtree.html) (Interactive visualization)
+- [Expanded by independent developers](https://bioconductor.org/books/release/OMA/pages/miaverse.html#sec-packages)
+
+**Interoperable with the `r BiocStyle::Biocpkg("SummarizedExperiment")` ecosystem**
+
+</div>
+
+<div style="flex: 0 0 30%;">
+
+![](https://raw.githubusercontent.com/microbiome/mia/refs/heads/devel/man/figures/mia_logo.png){fig-alt="mia logo." width="20%"} ![](https://raw.githubusercontent.com/EBI-Metagenomics/MGnifyR/refs/heads/devel/man/figures/mgnifyr_logo.png){fig-alt="MGnifyR logo." width="20%"} ![](https://raw.githubusercontent.com/EBI-Metagenomics/HoloFoodR/refs/heads/devel/man/figures/holofoodr_logo.png){fig-alt="HoloFoodR logo." width="20%"} ![](https://raw.githubusercontent.com/Bioconductor/BiocStickers/refs/heads/devel/iSEE/iSEE.png){fig-alt="iSEE logo." width="20%"} ![](https://raw.githubusercontent.com/Bioconductor/BiocStickers/refs/heads/devel/MultiAssayExperiment/MultiAssayExperiment.png){fig-alt="MAE logo." width="20%"} ![](https://raw.githubusercontent.com/Bioconductor/BiocStickers/refs/heads/devel/SummarizedExperiment/SummarizedExperiment.png){fig-alt="SE logo." width="20%"} ![](https://raw.githubusercontent.com/Bioconductor/BiocStickers/refs/heads/devel/SingleCellExperiment/SingleCellExperiment.png){fig-alt="SCE logo." width="20%"} ![](https://raw.githubusercontent.com/Bioconductor/BiocStickers/refs/heads/devel/scater/scater.png){fig-alt="scater logo." width="20%"} ![](https://pbs.twimg.com/media/FDNU5KgWYAcnU8w.jpg){fig-alt="benchdamic logo." width="20%"} ![](https://netcomi.de/logo.png){fig-alt="netcomi logo." width="20%"} ![](https://raw.githubusercontent.com/statdivlab/radEmu/refs/heads/main/man/figures/logo.png){fig-alt="radEmu logo." width="20%"} ![](https://mikelove.github.io/assets/DESeq2.png){fig-alt="DESeq2 logo." width="20%"} ![](https://avatars.githubusercontent.com/u/18152373?s=280&v=4){fig-alt="Biobakery logo." width="20%"} ![](https://raw.githubusercontent.com/thomazbastiaanssen/anansi/refs/heads/devel/man/figures/anansi_hex.png){fig-alt="anansi logo." width="20%"}
+</div>
+
+</div>
+
+### Trained-guided live coding
+
+#### Start your engines!
+
+- Follow the instructions of instructor
+- Or prepare your local R session
+
+#### Import data
+
+Many publicly available microbiome datasets can be accessed directly from
+Bioconductor packages.
+
+In this workshop, we use an example dataset from the
+`r BiocStyle::Biocpkg("mia")` package [@hintikka2021]. The study compares mice
+fed either a high-fat or low-fat diet, with and without prebiotic
+supplementation. The dataset contains multiple data types, including:
+
+- 16S rRNA amplicon sequencing, which measures microbial abundances.
+- Metabolomics, which measures metabolite concentrations.
+
+We first load the dataset and keep these two layers.
+
+```{r}
+#| label: import_data
+library(mia)
+
+data("HintikkaXOData")
+mae <- HintikkaXOData
+mae <- mae[, , c(1, 2)]
+mae
+```
+
+The dataset is stored as a `r BiocStyle::Biocpkg("MultiAssayExperiment")`, a
+container designed for multi-omics data. It keeps multiple datasets together
+while maintaining the links between samples.
+
+For most of this tutorial, we focus only on the microbiome data. Although
+keeping everything in a `r BiocStyle::Biocpkg("MultiAssayExperiment")` is
+generally recommended, extracting a single dataset makes it easier to introduc
+the basic analysis workflow.
+
+The microbiome data is stored as a
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")`.
+
+```{r}
+#| label: import_data2
+tse <- getWithColData(mae, 1)
+tse
+```
+
+#### Data container
+
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` extends
+`r BiocStyle::Biocpkg("SummarizedExperiment")` class by adding a support for
+microbiome-specific
+datatypes. These include, for instance, `rowTree` slot that can be utilized to
+store phylogeny or any other hierarchical presentation of the data. All slots
+derived from `r BiocStyle::Biocpkg("SummarizedExperiment")` class are also available in `r BiocStyle::Biocpkg("TreeSummarizedExperiment")`, providing full backward
+compatibility.
+
+![](figures/TreeSE.png){width=80%}
+
+```{r}
+#| label: print_treese
+tse
+```
+
+Slots can be accessed with dedicated accessor functions. For instance,
+`colData` (sample metadata) can be accessed with `colData()` function.
+
+```{r}
+#| label: show_coldata
+colData(tse) |> head()
+```
+
+#### Data processing
+
+Microbiome data has unique characteristics, meaning that dealing with such data
+also poses unique challenges and approaches. The `mia` package provides methods
+for performing common operations on microbiome data within the SE ecosystem.
+
+For instance, agglomeration is commonly used to reduce the number of features or
+to focus on biologically meaningful subgroups of the data. Agglomeration means
+merging data into higher taxonomic levels by summing the abundances of related
+taxa.
+
+Below, we agglomerate the data into all available taxonomy levels.
+
+```{r}
+#| label: agglomerate
+tse <- agglomerateByRanks(tse)
+```
+
+At first glance, it might seem that nothing has changed. However, the
+agglomerated data is stored in the `altExp` slot. This slot keeps track of the
+sample mapping and stores different versions of the data.
+
+We can access data agglomeration into the phylum level with the following
+command:
+
+```{r}
+#| label: access_phyla
+altExp(tse, "Phylum")
+```
+
+The data looks similar to original data; only the number of rows has changed.
+While we could store the phylum-level data in a separate variable, it's better
+to keep it in the `altExp` slot, as it maintains consistent sample mapping for
+us. Later, we will use `swapAltExp` to do this.
+
+Another data processing step where microbiome analysis has unique approaches is
+transformation. Below, we apply centered log-ratio (CLR) transformations which
+respect the compositional nature of microbiome data.
+
+```{r}
+#| label: transformation
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "rclr",
+    altexp = altExpNames(tse)
+)
+```
+
+The transformed abundance table is stored in the `assay` slot. This slot now
+contains two tables: the original abundance table and the CLR-transformed table
+We can access the transformed data with the following command:
+
+```{r}
+#| label: access_clr
+assay(tse, "rclr") |> head()
+```
+
+#### Community summaries
+
+While `r BiocStyle::Biocpkg("mia")` package include common methods for analysis,
+`r BiocStyle::Biocpkg("miaViz")` provides methods for visualizing microbiome
+data. For instance, we can visualize abundance of phyla with a bar plot. To
+compare study groups, we can visualize them separately.
+
+```{r}
+#| label: plot_abundance
+library(miaViz)
+
+# Get phylum-level data
+tse <- swapAltExp(tse, name = "Phylum", withColData = FALSE, saved = "main")
+
+# Create a bar plot
+plotAbundance(
+    tse,
+    assay.type = "counts",
+    as.relative = TRUE,
+    col.var = c("Fat", "XOS"),
+    facet.cols = TRUE,
+    scales = "free"
+)
+```
+
+```{r}
+#| label: swap_back_to_main
+# Switch data back to old orientation
+tse <- swapAltExp(tse, name = "main", withColData = FALSE)
+```
+
+#### Alpha diversity
+
+To summarize the diversity of microbial communities, alpha diversity is commonly
+calculated. There are several diversity indices available, all of which measure
+the number of distinct taxa and how evenly their abundances are distributed,
+each with a different emphasis.
+
+```{r}
+#| label: calculate_alpha
+tse <- addAlpha(tse, assay.type = "counts")
+```
+
+The results are stored in `colData`. By default, `addAlpha()` returns a set of
+indices that considers different aspects of diversity. Commonly, the results
+are visualized with a box plot.
+
+```{r}
+#| label: visualize_alpha
+plotBoxplot(tse, x = "Fat", col.var = "shannon_diversity")
+```
+
+#### Beta diversity
+
+While alpha diversity reflects within-sample diversity, beta diversity measures
+diversity between samples. This allows us to assess whether there are patterns
+in microbial profiles associated with covariates.
+
+Below, we calculate perform principal component analysis (PCA). The standard
+choice is to apply it to CLR-transformed data
+
+```{r}
+#| label: calculate_pca
+library(scater)
+tse <- runPCA(
+    tse,
+    assay.type = "rclr"
+)
+```
+
+After calculating the results, we can visualize them with the diagnosis.
+
+```{r}
+#| label: visualize_pca
+plotOrdination(tse, dimred = "PCA", colour.by = "Fat", add.ellipse = TRUE)
+```
+
+### Multi-omics
+
+Integrating multiple omics layers has become increasingly common in microbiome
+research. While `r BiocStyle::Biocpkg("MultiAssayExperiment")` provides a
+convenient container for storing multi-omics data, until recently relatively
+few analysis methods worked directly with it. As a result, users often had to
+extract individual assays before applying downstream methods.
+
+Fortunately, this is changing. An increasing number of packages now support
+`r BiocStyle::Biocpkg("MultiAssayExperiment")` directly, making it easier to
+build streamlined workflows for multi-omics analysis.
+
+Let's return to our `r BiocStyle::Biocpkg("MultiAssayExperiment")` object. It
+stores one `r BiocStyle::Biocpkg("SummarizedExperiment")` for each omics layer
+and uses a `sampleMap` to match samples across assays.
+
+```{r}
+#| label: show_mae
+# Lets put the TreeSE back to MAE
+tse <- swapAltExp(tse, "Family")
+mae[[1]] <- tse
+mae
+```
+
+One simple integration strategy is to calculate correlations between microbial
+taxa and metabolites. This approach is easy to interpret and can be further
+improved by restricting the analysis to biologically plausible feature pairs.
+The `r BiocStyle::Biocpkg("anansi")` package provides tools for this type of
+knowledge-guided analysis.
+
+However, microbial communities often act collectively rather than as individual
+taxa. Consequently, pairwise correlations may miss more complex relationships.
+
+An alternative is Joint Robust PCA (Joint-RPCA) [@vargas2026], which identifies
+variation that is shared across multiple omics datasets.
+
+The method works in two stages:
+
+1. It estimates a joint low-rank representation of the datasets, reducing noise while preserving variation shared across omics layers.
+
+2. It performs PCA on this shared representation to visualize the dominant patterns across all datasets.
+
+The following example performs Joint-RPCA using the microbiome and metabolomics
+data.
+
+```{r}
+#| label: joint-rpca
+
+# Apply CLR without imputation
+mae[[1]] <- transformAssay(
+    mae[[1]],
+    assay.type = "counts",
+    method = "rclr",
+    impute = FALSE,
+    name = "rclr_non_imputed")
+    
+# Apply log10 for metabolomics
+mae[[2]] <- transformAssay(
+    mae[[2]],
+    assay.type = "nmr",
+    method = "log10"
+)
+
+# Run joint-RPCA
+mae <- addJointRPCA(
+    mae,
+    experiments = c(1, 2),
+    assay.types = c("rclr_non_imputed", "log10")
+)
+
+# Visualize results
+plotJointRPCA(mae, "JointRPCA", colour.by = "Fat", add.ellipse = TRUE, ntop = 5)
+```
+
+### Time to try things out on your own!
+
+- Go to OMA ([bioconductor.org/books/release/OMA/](https://bioconductor.org/books/release/OMA/))
+- Navigate to [_Differential abundance analysis_ chapter](https://bioconductor.org/books/release/OMA/pages/differential_abundance.html)
+- Do exercises 4-6
+- Explore the book!
+
+<p style="text-align: right;">
+  [![](figures/OMA_ss.png){width=500px}](https://bioconductor.org/books/release/OMA/){preview-link="true"}
+</p>
+
+#### Differential abundance analysis
+
+```{r}
+#| label: calculate_daa
+#| eval: false
+library(maaslin3)
+
+res <- maaslin3(tse, formula = ~ Fat, output = "maaslin3_output")
+```
+
+```{r}
+#| label: visualize_daa
+#| eval: false
+file_path <- file.path("maaslin3_output", "figures", "summary_plot.png")
+knitr::include_graphics(file_path)
+```
+
+## Questions, discussion and recap
+
+1. Microbiome data science in `r BiocStyle::Biocpkg("SummarizedExperiment")` ecosystem
+2. Scalable and computationally efficient
+3. Integration of multi-table and multi-omics datasets
+
+## Thank you for your time!
+
+**Join us!**
+
+- Online book: [bioconductor.org/books/release/OMA/](https://bioconductor.org/books/release/OMA/)
+
+- Discussion forums: Bioconductor Zulip
+
+<img src="figures/bioc_sticker.png" width="150"/> <img src="figures/mia_logo.png" width="150"/>
+
+## Session information
+
+```{r}
+#| label: session_info
+sessionInfo()
+```
+
+## References
