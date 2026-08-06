@@ -1,6 +1,6 @@
 Package: BioC2026OMA
 Title: Orchestrating Microbiome Analysis workshop
-Version: 2.0.2
+Version: 2.0.3
 Authors@R: 
     c(person(given = "Tuomas", family = "Borman", role = c("aut", "cre"),
              email = "tuomas.v.borman@utu.fi",
@@ -21,6 +21,7 @@ Suggests:
     BiocManager,
     BiocParallel,
     BiocPkgTools,
+    BiocStyle,
     Biostrings,
     devtools,
     knitr,
