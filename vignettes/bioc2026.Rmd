@@ -1,5 +1,6 @@
 ---
-title: Bioconductor Conference 2026
+title: Orchestrating Microbiome Analysis with Bioconductor
+subtitle: Bioconductor Conference 2026
 vignette: >
     %\VignetteIndexEntry{BioC 2026}
     %\VignetteEngine{knitr::rmarkdown}
