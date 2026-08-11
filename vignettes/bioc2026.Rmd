@@ -24,11 +24,14 @@ knitr::opts_chunk$set(
 ```
 
 Authors:
-    Tuomas Borman^[University of Turku, tvborm@utu.fi]
+    Tuomas Borman^[University of Turku, tvborm@utu.fi],
+    Leo Lahti
     <br/>
-Last modified: 06 August, 2026.
+Last modified: 11 August, 2026.
 
 <img src="figures/BioC2026.png" width="150"/> <img src="figures/mia_logo.png" width="130"/>
+
+<img src="figures/utu.png" width="300"/>
 
 ## Overview
 
@@ -565,6 +568,8 @@ knitr::include_graphics(file_path)
 - Online book: [bioconductor.org/books/release/OMA/](https://bioconductor.org/books/release/OMA/)
 
 - Discussion forums: Bioconductor Zulip
+
+- Microbiome working group
 
 <img src="figures/bioc_sticker.png" width="150"/> <img src="figures/mia_logo.png" width="150"/>
 
